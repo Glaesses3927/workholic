@@ -157,7 +157,7 @@
     </div>
   </div>
   <Modal v-if="showInfoModal" @set-show="setShowInfoModal">
-    <template #header>#Work-Holicとは?</template>
+    <template #header>#WorkHolicとは?</template>
     <template #detail>
       <p>このWebアプリは，特定の形式で与えられたシフト表を解析しJSON形式に変換したうえで，半月分の勤務時間を計算します．</p>
       <p>使用方法：シフト表全体をコピぺし，Calculateボタンを押してください．勤務時間に年次有給休暇を考慮したい場合は，全ての日を表示させたシフト表をコピペし，所定労働時間(h)を入力した後，Calculateボタンを押してください．</p>
