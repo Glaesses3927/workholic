@@ -1,8 +1,8 @@
-# Work-Holic
+# WorkHolic
 
 このWebアプリは，特定の形式で与えられたシフト表を解析しJSON形式に変換したうえで，半月分の勤務時間を計算します．
 
-https://work-holic.glaesses.net
+https://workholic.glaesses.net
 
 
 ## 使用方法
