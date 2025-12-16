@@ -8,6 +8,8 @@
   const shiftsText = ref("")
   const result = ref([])
 
+  const timeRangePattern = /^(?:[0-1]?\d|2[0-9]):[0-5]\d-(?:\(\+\))?(?:[0-1]?\d|2[0-9]):[0-5]\d/;
+
   function parseShiftData() {
     const lines = shiftsText.value.split('\n').map(line => line.trim()).filter(line => line !== '');
     const shifts = [];
@@ -30,8 +32,8 @@
       } else if (line == "----" || line == "休日"){
         days--;
         return;
-      } else if (/^[12]?[0-9]:[0-9]{2}-[12]?[0-9]:[0-9]{2}/.test(line)) {
-        const [timePart, whPart] = line.split(' ');
+      } else if (timeRangePattern.test(line)) {
+        const [timePart, whPart] = line.trim().split(/\s+/);
         const [begin, end] = timePart.split('-');
         currentShift = {
           day: currentDay[1],
@@ -40,7 +42,7 @@
           end,
           rest: '0h',
           name: '',
-          wh: whPart.replace(/[()]/g, '')
+          wh: (whPart || '').replace(/[()]/g, '')
         };
       } else if (line.startsWith('[休')) {
         const restMatch = line.match(/\((\d+h\d*)\)/);
@@ -75,6 +77,7 @@
   function calc(){
     try {
       const [shifts, period, days] = parseShiftData();
+      console.log(shifts);
       const hours = calculateTotalWorkHours(shifts);
       result.value.push({period, hours, days});
       shiftsText.value = "";
