@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue'
+  import { ref, onMounted } from 'vue'
   import Modal from './Modal.vue';
   const showInfoModal = ref(false);
   const showDetailModal = ref(false);
@@ -7,6 +7,10 @@
   const nwh = ref(8)
   const shiftsText = ref("")
   const result = ref([])
+  const STORAGE_KEY = 'workholic_session_entries'
+  const entries = ref([])
+
+  const timeRangePattern = /^(?:[0-1]?\d|2[0-9]):[0-5]\d-(?:\(\+\))?(?:[0-1]?\d|2[0-9]):[0-5]\d/;
 
   function parseShiftData() {
     const lines = shiftsText.value.split('\n').map(line => line.trim()).filter(line => line !== '');
@@ -30,8 +34,8 @@
       } else if (line == "----" || line == "休日"){
         days--;
         return;
-      } else if (/^[12]?[0-9]:[0-9]{2}-[12]?[0-9]:[0-9]{2}/.test(line)) {
-        const [timePart, whPart] = line.split(' ');
+      } else if (timeRangePattern.test(line)) {
+        const [timePart, whPart] = line.trim().split(/\s+/);
         const [begin, end] = timePart.split('-');
         currentShift = {
           day: currentDay[1],
@@ -40,7 +44,7 @@
           end,
           rest: '0h',
           name: '',
-          wh: whPart.replace(/[()]/g, '')
+          wh: (whPart || '').replace(/[()]/g, '')
         };
       } else if (line.startsWith('[休')) {
         const restMatch = line.match(/\((\d+h\d*)\)/);
@@ -74,9 +78,13 @@
   }
   function calc(){
     try {
+      const originalShifts = shiftsText.value;
       const [shifts, period, days] = parseShiftData();
       const hours = calculateTotalWorkHours(shifts);
-      result.value.push({period, hours, days});
+      const res = { period, hours, days };
+      result.value.push(res);
+      entries.value.push({ shiftsText: originalShifts, nwh: nwh.value, result: res });
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entries.value));
       shiftsText.value = "";
     } catch (error) {
       alert(error);
@@ -84,6 +92,8 @@
   }
   function dele(i){
     result.value.splice(i,1);
+    entries.value.splice(i,1);
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entries.value));
   }
   function setShowInfoModal(){
     showInfoModal.value = !showInfoModal.value
@@ -94,6 +104,23 @@
   function setShowCautionModal(){
     showCautionModal.value = !showCautionModal.value
   }
+
+  onMounted(() => {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (!Array.isArray(saved)) return;
+      entries.value = saved;
+      result.value = saved.map(e => e.result).filter(Boolean);
+      if (saved.length > 0) {
+        const last = saved[saved.length - 1];
+        if (last && typeof last.nwh !== 'undefined') nwh.value = last.nwh;
+      }
+    } catch (e) {
+      console.warn('Failed to load session entries', e);
+    }
+  })
 </script>
 
 
