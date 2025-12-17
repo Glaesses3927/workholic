@@ -84,7 +84,7 @@
       const res = { period, hours, days };
       result.value.push(res);
       entries.value.push({ shiftsText: originalShifts, nwh: nwh.value, result: res });
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entries.value));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.value));
       shiftsText.value = "";
     } catch (error) {
       alert(error);
@@ -93,7 +93,7 @@
   function dele(i){
     result.value.splice(i,1);
     entries.value.splice(i,1);
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entries.value));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.value));
   }
   function setShowInfoModal(){
     showInfoModal.value = !showInfoModal.value
@@ -107,7 +107,7 @@
 
   onMounted(() => {
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const saved = JSON.parse(raw);
       if (!Array.isArray(saved)) return;
